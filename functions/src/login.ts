@@ -12,8 +12,6 @@ const login = functions.https.onCall(async (data, context) => {
     .where("phoneNumber", "==", phoneNumber)
     .where("otp", "==", OTP)
     .get();
-
-    console.log("cyka");
     
 
   let token;

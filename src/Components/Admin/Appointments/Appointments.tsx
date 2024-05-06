@@ -74,7 +74,7 @@ function Appointments(): JSX.Element {
 
     return (
         <div className="Appointments">
-			<Calendar style={{opacity: "65%", width: "75%", borderRadius: "10px"}} cellRender={cellRender} />
+			<Calendar style={{opacity: "85%", width: "75%", borderRadius: "10px"}} cellRender={cellRender} />
         </div>
     );
 }

@@ -1,51 +1,39 @@
 import "./Availability.css";
-import {
-  Calendar,
-  ConfigProvider,
-  Modal,
-  TimePicker,
-} from "antd";
-import heIL from "antd/locale/he_IL";
+import { Calendar, Modal, TimePicker } from "antd";
 
 import type { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import AvailabilityModel from "../../../Models/AvailabilityModel";
 import adminService from "../../../Services/AdminService";
-import { LoadingOutlined } from "@ant-design/icons";
+import {
+  LoadingOutlined,
+  PlusSquareOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 
 function Availability(): JSX.Element {
-  const [
-    loadingAvailability,
-    setLoadingAvailability,
-  ] = useState<boolean>(false);
+  const [loadingAvailability, setLoadingAvailability] =
+    useState<boolean>(false);
 
-  const [selectedDay, setSelectedDate] =
-    useState<string>(new Date().getDate() + "");
-  const [selectedMonth, setSelectedMonth] =
-    useState<string>(
-      new Date().getMonth() + 1 + ""
-    );
-  const [selectedYear, setSelectedYear] =
-    useState<string>(
-      new Date().getFullYear() + ""
-    );
-  const [startTime, setStartTime] =
-    useState<string>("");
-  const [endTime, setEndTime] =
-    useState<string>("");
-  const [isModalOpen, setIsModalOpen] =
-    useState(false);
+  const [selectedDay, setSelectedDate] = useState<string>(
+    new Date().getDate() + ""
+  );
+  const [selectedMonth, setSelectedMonth] = useState<string>(
+    new Date().getMonth() + 1 + ""
+  );
+  const [selectedYear, setSelectedYear] = useState<string>(
+    new Date().getFullYear() + ""
+  );
+  const [startTime, setStartTime] = useState<string>("");
+  const [endTime, setEndTime] = useState<string>("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [availability, setAvailability] =
-    useState<AvailabilityModel[]>([]);
+  const [availability, setAvailability] = useState<AvailabilityModel[]>([]);
 
   const getAvailability = async () => {
     setLoadingAvailability(true);
     setAvailability(
-      await adminService.getAvailability(
-        selectedMonth,
-        selectedYear
-      )
+      await adminService.getAvailability(selectedMonth, selectedYear)
     );
     setLoadingAvailability(false);
   };
@@ -66,15 +54,15 @@ function Availability(): JSX.Element {
   };
 
   const handleOk = () => {
-    const availability = new AvailabilityModel(
+    const newAvailability = new AvailabilityModel(
       selectedDay,
       selectedMonth,
       selectedYear,
       startTime,
       endTime
     );
-    adminService.setAvailability(availability);
-    getAvailability();
+    adminService.setAvailability(newAvailability);
+    availability.push(newAvailability);
     setIsModalOpen(false);
   };
 
@@ -84,28 +72,30 @@ function Availability(): JSX.Element {
 
   const cellRender = (value: Dayjs) => {
     const day = value.format("D");
+    const month = value.format("M");
     const availabilityDay = availability.find(
-      (a) => a.day === day
+      (a) => a.day === day && a.month === month
     );
 
     return (
-      <div>
+      <div className="cell">
         {loadingAvailability ? (
           <LoadingOutlined />
         ) : (
-          <div>
+          <div className="cell">
             {availabilityDay ? (
-              <div
-                style={{ textAlign: "center" }}
-              >
-                {availabilityDay.startTime} עד{" "}
-                {availabilityDay.endTime}
+              <div className="cellContext">
+                <EditOutlined />
+                {availabilityDay.startTime} עד {availabilityDay.endTime}
               </div>
             ) : (
-              <div
-                style={{ textAlign: "center" }}
-              >
-                חופש
+              <div className="cellContext">
+                לא עודכן זמינות
+                <PlusSquareOutlined
+                  onClick={() => {
+                    handleSelect(value);
+                  }}
+                />
               </div>
             )}
           </div>
@@ -118,20 +108,23 @@ function Availability(): JSX.Element {
     <>
       <div className="Availability">
         <Calendar
-          onSelect={handleSelect}
           style={{
-            direction: "rtl",
+            opacity: "85%",
+            width: "75%",
+            borderRadius: "10px",
             textAlign: "center",
+            direction: "rtl",
           }}
+          onPanelChange={(value) => {
+            setSelectedMonth(value.format("M"));
+            setSelectedYear(value.format("YYYY"));
+          }}      
           cellRender={cellRender}
           locale={{
             lang: {
               locale: "he_IL",
               placeholder: "בחר תאריך",
-              rangePlaceholder: [
-                "תאריך התחלה",
-                "תאריך סיום",
-              ],
+              rangePlaceholder: ["תאריך התחלה", "תאריך סיום"],
               today: "היום",
               now: "כעת",
               backToToday: "חזור להיום",
@@ -152,10 +145,8 @@ function Availability(): JSX.Element {
               monthBeforeYear: true,
               previousMonth: "חודש קודם (PageUp)",
               nextMonth: "חודש הבא (PageDown)",
-              previousYear:
-                "שנה שעברה (Control + left)",
-              nextYear:
-                "שנה הבאה (Control + right)",
+              previousYear: "שנה שעברה (Control + left)",
+              nextYear: "שנה הבאה (Control + right)",
               previousDecade: "עשור קודם",
               nextDecade: "עשור הבא",
               previousCentury: "מאה קודמת",

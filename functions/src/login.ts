@@ -13,6 +13,9 @@ const login = functions.https.onCall(async (data, context) => {
     .where("otp", "==", OTP)
     .get();
 
+    console.log("cyka");
+    
+
   let token;
   if (snapshot.empty) {
     return new HttpsError("not-found", "User not found");

@@ -1,0 +1,58 @@
+.SignIn {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.context {
+  background-color: rgba(220, 255, 255, 0.80);
+  width: 30%;
+  height: 60%;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.registerDiv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.phoneInput {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  height: 15%;
+}
+
+.hidden {
+  display: none;
+}
+
+h3 {
+  position: absolute;
+  top: 25%;
+}
+
+.Error {
+  color: red;
+  margin-left: 25px;
+  position: absolute;
+}
+
+.otp-input {
+  direction: ltr;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  height: 15%;
+}

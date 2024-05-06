@@ -1,0 +1,33 @@
+.UsersPage {
+  width: 100%;
+  height: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.users {
+  height: 100%;
+  width: 75%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.whatsapp-link {
+  width: 30%;
+  direction: ltr;
+  color: black;
+}
+
+.name {
+  width: 30%;
+}
+
+.list {
+  width: 100%;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}

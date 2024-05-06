@@ -1,0 +1,32 @@
+.Gallery {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.galleryContext {
+  width: 45%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+
+.image {
+  padding: 3px;
+  background: repeating-linear-gradient(
+    -25deg,
+    #fff,
+    #fff 20px,
+    #df5646 20px,
+    #df5646 40px,
+    #fff 40px,
+    #fff 60px,
+    #1c78a4 60px,
+    #1c78a4 80px
+  );
+}

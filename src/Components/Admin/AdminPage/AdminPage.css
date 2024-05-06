@@ -1,0 +1,14 @@
+.AdminPage {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 15% 85%;
+}
+
+.content {
+  height: 100%;
+  width: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

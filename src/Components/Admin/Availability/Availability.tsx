@@ -9,9 +9,12 @@ import {
   LoadingOutlined,
   PlusSquareOutlined,
   EditOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 
 function Availability(): JSX.Element {
+  const [dayOff, setDayOff] = useState<number>();
+  const [dayOffLoading, setDayOffLoading] = useState<boolean>(false);
   const [loadingAvailability, setLoadingAvailability] =
     useState<boolean>(false);
 
@@ -38,8 +41,15 @@ function Availability(): JSX.Element {
     setLoadingAvailability(false);
   };
 
+  const getDayOff = async () => {
+    setDayOffLoading(true);
+    setDayOff(await adminService.getDayOff());
+    setDayOffLoading(false);
+  };
+
   useEffect(() => {
     getAvailability();
+    getDayOff();
   }, [selectedMonth, selectedYear]);
 
   const handleSelect = (value: Dayjs) => {
@@ -71,10 +81,34 @@ function Availability(): JSX.Element {
   };
 
   const cellRender = (value: Dayjs) => {
+    if (value.day() === 6) {
+      return (
+        <div className="cell">
+          <span>שבת</span>
+        </div>
+      );
+    }
+
+    if (dayOffLoading) {
+      return (
+        <div className="cell">
+          <LoadingOutlined />
+        </div>
+      );
+    } else {
+      if (value.day() === dayOff) {
+        return (
+          <div className="cell">
+            <span>יום חופש</span>
+          </div>
+        );
+      }
+    }
     const day = value.format("D");
     const month = value.format("M");
+    const year = value.format("YYYY");
     const availabilityDay = availability.find(
-      (a) => a.day === day && a.month === month
+      (a) => a.day === day && a.month === month && a.year === year
     );
 
     return (
@@ -85,17 +119,39 @@ function Availability(): JSX.Element {
           <div className="cell">
             {availabilityDay ? (
               <div className="cellContext">
-                <EditOutlined />
+                <div className="cellButtons">
+                  <div className="edit">
+                    <EditOutlined />
+                  </div>
+                  <div className="delete">
+                    <DeleteOutlined
+                      onClick={async () => {
+                        await adminService.deleteAvailability(
+                          availabilityDay.id || ""
+                        );
+                        setAvailability(
+                          availability.filter(
+                            (a) => a.id !== availabilityDay.id
+                          )
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
                 {availabilityDay.startTime} עד {availabilityDay.endTime}
               </div>
             ) : (
               <div className="cellContext">
-                לא עודכן זמינות
-                <PlusSquareOutlined
-                  onClick={() => {
-                    handleSelect(value);
-                  }}
-                />
+                <div className="cellButton">
+                  <div className="add">
+                    <PlusSquareOutlined
+                      onClick={() => {
+                        handleSelect(value);
+                      }}
+                    />
+                  </div>
+                </div>
+                <span>לא עודכנה זמינות</span>
               </div>
             )}
           </div>
@@ -104,9 +160,36 @@ function Availability(): JSX.Element {
     );
   };
 
+  function updateDayOff(day: number) {
+    setDayOff(day);
+    adminService.setDayOff(day);
+  }
+
   return (
     <>
       <div className="Availability">
+        <div className="dayOff">
+          {dayOffLoading ? (
+            <LoadingOutlined />
+          ) : (
+            <>
+              <label>יום חופש:</label>
+              <select
+                onChange={(e) => {
+                  updateDayOff(parseInt(e.target.value));
+                }}
+                value={dayOff}
+              >
+                <option value="0">ראשון</option>
+                <option value="1">שני</option>
+                <option value="2">שלישי</option>
+                <option value="3">רביעי</option>
+                <option value="4">חמישי</option>
+                <option value="5">שישי</option>
+              </select>
+            </>
+          )}
+        </div>
         <Calendar
           style={{
             opacity: "85%",
@@ -118,7 +201,7 @@ function Availability(): JSX.Element {
           onPanelChange={(value) => {
             setSelectedMonth(value.format("M"));
             setSelectedYear(value.format("YYYY"));
-          }}      
+          }}
           cellRender={cellRender}
           locale={{
             lang: {

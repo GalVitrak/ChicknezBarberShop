@@ -55,7 +55,14 @@ function Header(): JSX.Element {
         </>
       </div>
       <div className="menu">
-        <button className="barber-button">קביעת תורים</button>
+        <button
+          className="barber-button"
+          onClick={() => {
+            navigate("/appointments");
+          }}
+        >
+          קביעת תורים
+        </button>
         <img
           className="logo"
           src={"./assets/logo.jpeg"}

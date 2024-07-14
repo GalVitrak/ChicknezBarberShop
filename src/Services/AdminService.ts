@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { functions } from "../../firebase-config";
+import AppointmentTypeModel from "../Models/AppointmentTypeModel";
 import AvailabilityModel from "../Models/AvailabilityModel";
 import UserModel from "../Models/UserModel";
 import { httpsCallable } from "firebase/functions";
@@ -50,6 +51,28 @@ class AdminService {
     const dayOff: number = response.data as number;
     return dayOff;
   }
+
+  public async getAppointmentTypes(): Promise<AppointmentTypeModel[]> {
+    const getAppointmentTypes = httpsCallable(functions, "getAppointmentTypes");
+    const response = await getAppointmentTypes();
+    const types: AppointmentTypeModel[] =
+      response.data as AppointmentTypeModel[];
+    return types;
+  }
+
+  public async addAppointmentType(type: AppointmentTypeModel): Promise<void> {
+    const addAppointmentType = httpsCallable(functions, "addAppointmentType");
+    await addAppointmentType(type);
+  }
+
+  public async deleteAppointmentType(id: string): Promise<void> {
+    const deleteAppointmentType = httpsCallable(
+      functions,
+      "deleteAppointmentType"
+    );
+    await deleteAppointmentType({ id: id });
+  }
 }
+
 const adminService = new AdminService();
 export default adminService;

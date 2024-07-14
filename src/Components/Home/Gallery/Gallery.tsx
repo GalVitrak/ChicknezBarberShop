@@ -3,7 +3,7 @@ import "./Gallery.css";
 import { Image } from "antd";
 import galleryService from "../../../Services/GallryService";
 import ImageModel from "../../../Models/ImageModel";
-import { LoadingOutlined } from "@ant-design/icons";
+import { Loading } from "../../Layout/Loading/Loading";
 
 function Gallery(): JSX.Element {
   const [images, setImages] = useState<ImageModel[]>([]);
@@ -23,22 +23,19 @@ function Gallery(): JSX.Element {
       <div className="galleryContext">
         <Image.PreviewGroup
           preview={{
-            
             toolbarRender() {
               return <div></div>;
             },
-            
           }}
         >
           {loadingImages || images.length < 0 ? (
             <div>
-              {" "}
-              <LoadingOutlined spin />
+              <Loading />
             </div>
           ) : (
             images.map((image) => (
               <Image
-              className="image"
+                className="image"
                 key={image.id}
                 width={250}
                 src={image.imagePath}

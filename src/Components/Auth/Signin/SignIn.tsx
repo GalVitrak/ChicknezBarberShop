@@ -13,7 +13,6 @@ import CredentialsModel from "../../../Models/CredentialsModel";
 import UserModel from "../../../Models/UserModel";
 import notifyService from "../../../Services/NotifyService";
 import authService from "../../../Services/AuthService";
-import { set } from "firebase/database";
 
 function SignIn(): JSX.Element {
   const [otp, setOTP] = useState<string>("");
@@ -24,10 +23,14 @@ function SignIn(): JSX.Element {
   const [registerHidden, setRegisterHidden] = useState<string>("hidden");
   const [phoneInputHidden, setPhoneInputHidden] =
     useState<string>("phoneInput");
-  const [tries, setTries] = useState<number>(3);
+  const [tries, setTries] = useState<number>(2);
   const [isValid, setIsValid] = useState(false);
   const [isFNameValid, setIsFNameValid] = useState(false);
   const [isLNameValid, setIsLNameValid] = useState(false);
+
+  const [timer, setTimer] = useState<number>(60);
+
+  // write a function that will decrease the timer by 1 every second
 
   const navigate = useNavigate();
 
@@ -53,8 +56,6 @@ function SignIn(): JSX.Element {
         notifyService.success("התחברת בהצלחה");
         navigate("/home");
       } catch (err: any) {
-        console.log(err.message);
-
         notifyService.error(`טעות בקוד, מס' נסיונות שנותרו ${tries}`);
         setTries(tries - 1);
       }
@@ -67,6 +68,7 @@ function SignIn(): JSX.Element {
   }
 
   async function sendSMS() {
+    // clearInterval(interval);
     const taken = await authService.userExists(phone);
     if (!taken) {
       notifyService.error("אינך רשום למערכת, אנא הירשם");
@@ -162,6 +164,7 @@ function SignIn(): JSX.Element {
           >
             התחבר
           </button>
+          <button>שלח קוד חדש {timer}</button>
         </div>
         <div className={registerHidden}>
           <div>

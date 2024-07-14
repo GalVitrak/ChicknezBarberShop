@@ -3,6 +3,7 @@ import AdminPage from "../../Admin/AdminPage/AdminPage";
 import Signin from "../../Auth/Signin/SignIn";
 import Gallery from "../../Home/Gallery/Gallery";
 import Home from "../../Home/Home/Home";
+import { MakeAppointment } from "../../Home/MakeAppointment/MakeAppointment";
 import "./Routing.css";
 import { Navigate, Route, Routes } from "react-router-dom";
 
@@ -14,6 +15,7 @@ function Routing(): JSX.Element {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/home" element={<Home />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/appointments" element={<MakeAppointment />} />
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="*" element={<Navigate to="/home" />} />
       </Routes>

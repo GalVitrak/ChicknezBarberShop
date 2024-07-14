@@ -10,6 +10,9 @@ import getAvailability from "./getAvailability";
 import setDayOff from "./setDayOff";
 import getDayOff from "./getDayOff";
 import deleteAvailability from "./deleteAvailability";
+import addAppointmentType from "./addAppointmentType";
+import getAppointmentTypes from "./getAppointmentTypes";
+import deleteAppointmentType from "./deleteAppointmentType";
 
 admin.initializeApp();
 
@@ -26,3 +29,6 @@ exports.getAvailability = getAvailability;
 exports.deleteAvailability = deleteAvailability;
 exports.setDayOff = setDayOff;
 exports.getDayOff = getDayOff;
+exports.getAppointmentTypes = getAppointmentTypes;
+exports.addAppointmentType = addAppointmentType;
+exports.deleteAppointmentType = deleteAppointmentType;

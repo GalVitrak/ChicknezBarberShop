@@ -44,14 +44,3 @@
   text-align: center;
 }
 
-.delete:hover {
-  transform: scale(1.2);
-}
-
-.edit:hover {
-  transform: scale(1.2);
-}
-
-.add:hover {
-  transform: scale(1.2);
-}

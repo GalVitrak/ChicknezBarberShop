@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 import AvailabilityModel from "../../../Models/AvailabilityModel";
 import adminService from "../../../Services/AdminService";
 import {
-  LoadingOutlined,
   PlusSquareOutlined,
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import { Loading } from "../../Layout/Loading/Loading";
 
 function Availability(): JSX.Element {
   const [dayOff, setDayOff] = useState<number>();
@@ -33,24 +33,31 @@ function Availability(): JSX.Element {
 
   const [availability, setAvailability] = useState<AvailabilityModel[]>([]);
 
+  useEffect(() => {
+    getAvailability();
+    getDayOff();
+  }, [selectedMonth, selectedYear]);
+
   const getAvailability = async () => {
     setLoadingAvailability(true);
-    setAvailability(
-      await adminService.getAvailability(selectedMonth, selectedYear)
+    console.log("cyka1");
+
+    const newAvailability = await adminService.getAvailability(
+      selectedMonth,
+      selectedYear
     );
+    setAvailability(newAvailability);
     setLoadingAvailability(false);
   };
 
   const getDayOff = async () => {
     setDayOffLoading(true);
-    setDayOff(await adminService.getDayOff());
+    console.log("cyka2");
+
+    const newDayOff = await adminService.getDayOff();
+    setDayOff(newDayOff);
     setDayOffLoading(false);
   };
-
-  useEffect(() => {
-    getAvailability();
-    getDayOff();
-  }, [selectedMonth, selectedYear]);
 
   const handleSelect = (value: Dayjs) => {
     setSelectedDate(value.format("D"));
@@ -92,7 +99,7 @@ function Availability(): JSX.Element {
     if (dayOffLoading) {
       return (
         <div className="cell">
-          <LoadingOutlined />
+          <Loading />
         </div>
       );
     } else {
@@ -114,7 +121,7 @@ function Availability(): JSX.Element {
     return (
       <div className="cell">
         {loadingAvailability ? (
-          <LoadingOutlined />
+          <Loading />
         ) : (
           <div className="cell">
             {availabilityDay ? (
@@ -170,7 +177,7 @@ function Availability(): JSX.Element {
       <div className="Availability">
         <div className="dayOff">
           {dayOffLoading ? (
-            <LoadingOutlined />
+            <Loading />
           ) : (
             <>
               <label>יום חופש:</label>
@@ -193,16 +200,18 @@ function Availability(): JSX.Element {
         <Calendar
           style={{
             opacity: "85%",
+            height: "70vh",
             width: "75%",
             borderRadius: "10px",
             textAlign: "center",
             direction: "rtl",
+            overflow: "auto",
           }}
           onPanelChange={(value) => {
             setSelectedMonth(value.format("M"));
             setSelectedYear(value.format("YYYY"));
           }}
-          cellRender={cellRender}
+          dateCellRender={cellRender}
           locale={{
             lang: {
               locale: "he_IL",

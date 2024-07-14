@@ -17,16 +17,18 @@
 }
 
 .image {
-  padding: 3px;
-  background: repeating-linear-gradient(
-    -25deg,
-    #fff,
-    #fff 20px,
-    #df5646 20px,
-    #df5646 40px,
-    #fff 40px,
-    #fff 60px,
-    #1c78a4 60px,
-    #1c78a4 80px
-  );
+  border: 5px solid transparent;
+  border-image: repeating-linear-gradient(
+      45deg,
+      #fff,
+      #fff 10px,
+      #df5646 10px,
+      #df5646 20px,
+      #fff 20px,
+      #fff 30px,
+      #1c78a4 30px,
+      #1c78a4 40px
+    )
+    12/10px;
+  box-sizing: border-box;
 }

@@ -1,17 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useNavigate } from "react-router-dom";
 import "./Header.css";
-import { AuthActionType, authStore } from "../../../Redux/AuthState";
+import { authStore } from "../../../Redux/AuthState";
 import authService from "../../../Services/AuthService";
-import login from "../../../Assets/log-in.png";
-import logout from "../../../Assets/logout.png";
 import {
   AppstoreOutlined,
   LoginOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
+import { useState } from "react";
+import { Modal } from "antd";
+import SignIn from "../../Auth/Signin/SignIn";
 
 function Header(): JSX.Element {
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  function handleCallback(data: boolean) {
+    setModalOpen(data);
+  }
+
   const navigate = useNavigate();
   return (
     <div className="header">
@@ -21,7 +28,7 @@ function Header(): JSX.Element {
             <span className="welcome">התחבר</span>
             <LoginOutlined
               onClick={() => {
-                navigate("/auth");
+                setModalOpen(true);
               }}
             />
           </>
@@ -80,7 +87,22 @@ function Header(): JSX.Element {
           גלריה
         </button>
       </div>
-      <div></div>
+      <Modal
+        okText="התחבר"
+        cancelText="ביטול"
+        title="התחברות"
+        width={550}
+        centered={true}
+        open={modalOpen}
+        onCancel={() => {
+          setModalOpen(false);
+        }}
+        cancelButtonProps={{ style: { display: "none" } }}
+        okButtonProps={{ style: { display: "none" } }}
+        destroyOnClose={true}
+      >
+        <SignIn closeModal={handleCallback} />
+      </Modal>
     </div>
   );
 }

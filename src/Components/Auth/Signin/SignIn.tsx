@@ -7,14 +7,17 @@ import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import OtpInput from "react-otp-input";
 import { useEffect, useState } from "react";
-// import UserModel from "../../../Models/UserModel";
 import { useNavigate } from "react-router-dom";
 import CredentialsModel from "../../../Models/CredentialsModel";
 import UserModel from "../../../Models/UserModel";
 import notifyService from "../../../Services/NotifyService";
 import authService from "../../../Services/AuthService";
 
-function SignIn(): JSX.Element {
+type SignInProps = {
+  closeModal: (data: boolean) => void;
+};
+
+function SignIn(props: SignInProps): JSX.Element {
   const [otp, setOTP] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [firstName, setFirstName] = useState<string>("");
@@ -29,8 +32,29 @@ function SignIn(): JSX.Element {
   const [isLNameValid, setIsLNameValid] = useState(false);
 
   const [timer, setTimer] = useState<number>(60);
+  const [countdown, setCountdown] = useState<boolean>(false);
 
-  // write a function that will decrease the timer by 1 every second
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (countdown) {
+      interval = setInterval(() => {
+        setTimer((prevSeconds) => {
+          if (prevSeconds <= 0) {
+            setCountdown(false);
+            return 0;
+          }
+          return prevSeconds - 1;
+        });
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [countdown]);
+
+  const startCountdown = () => {
+    setTimer(60);
+    setCountdown(true);
+  };
 
   const navigate = useNavigate();
 
@@ -54,7 +78,7 @@ function SignIn(): JSX.Element {
       try {
         await authService.login(credentials);
         notifyService.success("התחברת בהצלחה");
-        navigate("/home");
+        props.closeModal(false);
       } catch (err: any) {
         notifyService.error(`טעות בקוד, מס' נסיונות שנותרו ${tries}`);
         setTries(tries - 1);
@@ -63,12 +87,11 @@ function SignIn(): JSX.Element {
       notifyService.error(
         "נכשלת באימות הקוד 3 פעמים. אנא נסה שנית מאוחר יותר."
       );
-      navigate("/home");
+      props.closeModal(false);
     }
   }
 
   async function sendSMS() {
-    // clearInterval(interval);
     const taken = await authService.userExists(phone);
     if (!taken) {
       notifyService.error("אינך רשום למערכת, אנא הירשם");
@@ -79,6 +102,7 @@ function SignIn(): JSX.Element {
     authService.updateOTP(phone);
     setPhoneInputHidden("hidden");
     setOtpHidden("otp-input");
+    startCountdown();
   }
 
   async function registerUser() {
@@ -91,6 +115,7 @@ function SignIn(): JSX.Element {
     authService.registerUser(user);
     setRegisterHidden("hidden");
     setOtpHidden("otp-input");
+    startCountdown();
   }
 
   type FieldType = {
@@ -101,90 +126,99 @@ function SignIn(): JSX.Element {
 
   return (
     <div className="SignIn">
-      <div className="context">
-        <h3>אנא התחבר עם מספר הטלפון שלך</h3>
-        <div className={phoneInputHidden}>
+      <h3>אנא התחבר עם מספר הטלפון שלך</h3>
+      <div className={phoneInputHidden}>
+        <Form
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          layout="horizontal"
+          style={{ maxWidth: "100%" }}
+        >
+          <Form.Item<FieldType>
+            label="מספר טלפון"
+            name="phone"
+            rules={[
+              { required: true, message: "אנא הכנס מספר טלפון" },
+              {
+                validator(rule, value, callback) {
+                  if (!isPhoneValid(value)) {
+                    callback("אנא הכנס מספר טלפון תקין");
+                  }
+                  callback();
+                },
+              },
+            ]}
+          >
+            <PhoneInput
+              required
+              style={{ direction: "ltr" }}
+              defaultCountry={"il"}
+              defaultMask="...-...-...."
+              value={phone}
+              onChange={(value) => {
+                console.log(value);
+                isPhoneValid(value);
+              }}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button
+              disabled={!isValid}
+              onClick={() => {
+                sendSMS();
+              }}
+            >
+              שלח סיסמא חד פעמית
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+      <div className={otpHidden}>
+        <OtpInput
+          inputStyle={{ direction: "rtl" }}
+          value={otp}
+          onChange={setOTP}
+          numInputs={6}
+          shouldAutoFocus={true}
+          renderSeparator={<span>•</span>}
+          renderInput={(props) => <input {...props} />}
+        ></OtpInput>
+        <button
+          onClick={() => {
+            verifyOTP();
+          }}
+        >
+          התחבר
+        </button>
+        <button
+          onClick={() => {
+            authService.updateOTP(phone);
+            startCountdown();
+          }}
+          disabled={countdown}
+        >
+          <>{timer === 0 ? "שלח קוד חדש" : `שלח קוד חדש ${timer}`}</>
+        </button>
+      </div>
+      <div className={registerHidden}>
+        <div>
           <Form
             labelCol={{ span: 8 }}
             wrapperCol={{ span: 16 }}
             layout="horizontal"
             style={{ maxWidth: "100%" }}
           >
-            <Form.Item<FieldType>
-              label="מספר טלפון"
-              name="phone"
-              rules={[
-                { required: true, message: "אנא הכנס מספר טלפון" },
-                {
-                  validator(rule, value, callback) {
-                    if (!isPhoneValid(value)) {
-                      callback("אנא הכנס מספר טלפון תקין");
-                    }
-                    callback();
-                  },
-                },
-              ]}
-            >
-              <PhoneInput
-                style={{ direction: "ltr" }}
-                defaultCountry={"il"}
-                value={phone}
-                onChange={(value) => {
-                  isPhoneValid(value);
-                }}
-              />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                disabled={!isValid}
-                onClick={() => {
-                  sendSMS();
-                }}
-              >
-                שלח סיסמא חד פעמית
-              </Button>
-            </Form.Item>
-          </Form>
-        </div>
-        <div className={otpHidden}>
-          <OtpInput
-            inputStyle={{ direction: "rtl" }}
-            value={otp}
-            onChange={setOTP}
-            numInputs={6}
-            shouldAutoFocus={true}
-            renderSeparator={<span>•</span>}
-            renderInput={(props) => <input {...props} />}
-          ></OtpInput>
-          <button
-            // disabled={!isValid}
-            onClick={() => {
-              verifyOTP();
-            }}
-          >
-            התחבר
-          </button>
-          <button>שלח קוד חדש {timer}</button>
-        </div>
-        <div className={registerHidden}>
-          <div>
-            <Form
-              labelCol={{ span: 8 }}
-              wrapperCol={{ span: 16 }}
-              layout="horizontal"
-              style={{ maxWidth: "100%" }}
-            >
-              <Form.Item<FieldType>
+            {/* <Form.Item<FieldType>
                 label="מספר טלפון"
                 name="phone"
                 rules={[
                   { required: true, message: "אנא הכנס מספר טלפון" },
                   {
-                    validator(rule, value) {
+                    validator(rule, value, callback) {
                       if (!isPhoneValid(value)) {
-                        return Promise.reject("אנא הכנס מספר טלפון תקין");
+                        callback("אנא הכנס מספר טלפון תקין");
                       }
-                      return Promise.resolve();
+                      callback();
                     },
                   },
                 ]}
@@ -194,71 +228,71 @@ function SignIn(): JSX.Element {
                   defaultCountry={"il"}
                   value={phone}
                   onChange={(value) => {
-                    setPhone(value);
-                  }}
-                />{" "}
-              </Form.Item>
-              <Form.Item<FieldType>
-                label="שם פרטי"
-                name="firstName"
-                rules={[
-                  { required: true, message: "אנא הכנס שם פרטי" },
-                  {
-                    validator(rule, value) {
-                      if (value.length > 0) {
-                        setIsFNameValid(true);
-                      } else {
-                        setIsFNameValid(false);
-                      }
-                    },
-                  },
-                ]}
-              >
-                <Input
-                  value={firstName}
-                  onChange={(e) => {
-                    setFirstName(e.target.value);
+                    console.log(phone);
+                    isPhoneValid(value);
                   }}
                 />
-              </Form.Item>
-              <Form.Item<FieldType>
-                label="שם משפחה"
-                name="lastName"
-                rules={[
-                  {
-                    required: true,
-                    message: "אנא הכנס שם משפחה",
+              </Form.Item> */}
+            <Form.Item<FieldType>
+              label="שם פרטי"
+              name="firstName"
+              rules={[
+                { required: true, message: "אנא הכנס שם פרטי" },
+                {
+                  validator(rule, value) {
+                    if (value.length > 0) {
+                      setIsFNameValid(true);
+                    } else {
+                      setIsFNameValid(false);
+                    }
                   },
-                  {
-                    validator(rule, value) {
-                      if (value.length > 0) {
-                        setIsLNameValid(true);
-                      } else {
-                        setIsLNameValid(false);
-                      }
-                    },
+                },
+              ]}
+            >
+              <Input
+                value={firstName}
+                onChange={(e) => {
+                  setFirstName(e.target.value);
+                }}
+              />
+            </Form.Item>
+            <Form.Item<FieldType>
+              label="שם משפחה"
+              name="lastName"
+              rules={[
+                {
+                  required: true,
+                  message: "אנא הכנס שם משפחה",
+                },
+                {
+                  validator(rule, value) {
+                    if (value.length > 0) {
+                      setIsLNameValid(true);
+                    } else {
+                      setIsLNameValid(false);
+                    }
                   },
-                ]}
+                },
+              ]}
+            >
+              <Input
+                value={lastName}
+                onChange={(e) => {
+                  setLastName(e.target.value);
+                }}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                onClick={() => {
+                  registerUser();
+                }}
+                disabled={!isValid || !isFNameValid || !isLNameValid}
               >
-                <Input
-                  value={lastName}
-                  onChange={(e) => {
-                    setLastName(e.target.value);
-                  }}
-                />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  onClick={() => {
-                    registerUser();
-                  }}
-                  disabled={!isValid || !isFNameValid || !isLNameValid}
-                >
-                  הירשם
-                </Button>
-              </Form.Item>
-            </Form>
-          </div>
+                הירשם
+              </Button>
+            </Form.Item>
+          </Form>
         </div>
       </div>
     </div>
@@ -266,3 +300,6 @@ function SignIn(): JSX.Element {
 }
 
 export default SignIn;
+function sendDataToParent(modalOpen: boolean) {
+  throw new Error("Function not implemented.");
+}

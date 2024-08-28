@@ -9,12 +9,14 @@ class AppointmentTypeModel {
     name: string,
     duration: number,
     price: number,
-    description: string
+    description: string,
+    id?: string
   ) {
     this.name = name;
     this.duration = duration;
     this.price = price;
     this.description = description;
+    this.id = id;
   }
 }
 

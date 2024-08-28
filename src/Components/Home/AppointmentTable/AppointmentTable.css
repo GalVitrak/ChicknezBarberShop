@@ -69,12 +69,9 @@
   border-top: none;
 }
 
-.appointmentsTypeTable tr:hover {
+.appointmentsTypeTable tr:hover td:not(:nth-child(5)) {
+  cursor: pointer;
   scale: 1.1;
-}
-
-.appointmentsTypeTable tr:first-child:hover {
-  scale: 1;
 }
 
 .tableOptions {

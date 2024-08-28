@@ -5,22 +5,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-
-
-.registerDiv {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.phoneInput {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  height: 15%;
+  height: 300px;
 }
 
 .hidden {
@@ -28,8 +13,8 @@
 }
 
 h3 {
-  position: absolute;
   top: 25%;
+  color: white;
 }
 
 .Error {
@@ -38,12 +23,8 @@ h3 {
   position: absolute;
 }
 
-.otp-input {
-  direction: ltr;
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  height: 15%;
+telegram-link {
+  font-size: x-large;
+  color: white;
+  text-decoration: none;
 }

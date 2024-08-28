@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./SignIn.css";
-import { Input, Form, Button } from "antd";
+import { Input, Form, Button, ConfigProvider } from "antd";
 import { PhoneNumberUtil } from "google-libphonenumber";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
-import OtpInput from "react-otp-input";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CredentialsModel from "../../../Models/CredentialsModel";
@@ -24,12 +23,13 @@ function SignIn(props: SignInProps): JSX.Element {
   const [lastName, setLastName] = useState<string>("");
   const [otpHidden, setOtpHidden] = useState<string>("hidden");
   const [registerHidden, setRegisterHidden] = useState<string>("hidden");
+  const [telegramHidden, setTelegramHidden] = useState<string>("hidden");
   const [phoneInputHidden, setPhoneInputHidden] =
     useState<string>("phoneInput");
   const [tries, setTries] = useState<number>(2);
   const [isValid, setIsValid] = useState(false);
-  const [isFNameValid, setIsFNameValid] = useState(false);
-  const [isLNameValid, setIsLNameValid] = useState(false);
+
+  const [chatID, setChatID] = useState<string>("");
 
   const [timer, setTimer] = useState<number>(60);
   const [countdown, setCountdown] = useState<boolean>(false);
@@ -96,7 +96,7 @@ function SignIn(props: SignInProps): JSX.Element {
     if (!taken) {
       notifyService.error("אינך רשום למערכת, אנא הירשם");
       setPhoneInputHidden("hidden");
-      setRegisterHidden("registerDiv");
+      setTelegramHidden("telegramDiv");
       return;
     }
     authService.updateOTP(phone);
@@ -111,7 +111,7 @@ function SignIn(props: SignInProps): JSX.Element {
       navigate("/home");
       return;
     }
-    const user = new UserModel(firstName, lastName, phone);
+    const user = new UserModel(firstName, lastName, phone, chatID);
     authService.registerUser(user);
     setRegisterHidden("hidden");
     setOtpHidden("otp-input");
@@ -126,180 +126,235 @@ function SignIn(props: SignInProps): JSX.Element {
 
   return (
     <div className="SignIn">
-      <h3>אנא התחבר עם מספר הטלפון שלך</h3>
       <div className={phoneInputHidden}>
-        <Form
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
-          layout="horizontal"
-          style={{ maxWidth: "100%" }}
-        >
-          <Form.Item<FieldType>
-            label="מספר טלפון"
-            name="phone"
-            rules={[
-              { required: true, message: "אנא הכנס מספר טלפון" },
-              {
-                validator(rule, value, callback) {
-                  if (!isPhoneValid(value)) {
-                    callback("אנא הכנס מספר טלפון תקין");
-                  }
-                  callback();
-                },
+        <ConfigProvider
+          theme={{
+            components: {
+              Form: {
+                labelColor: "white",
+                labelRequiredMarkColor: "red",
               },
-            ]}
-          >
-            <PhoneInput
-              required
-              style={{ direction: "ltr" }}
-              defaultCountry={"il"}
-              defaultMask="...-...-...."
-              value={phone}
-              onChange={(value) => {
-                console.log(value);
-                isPhoneValid(value);
-              }}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              disabled={!isValid}
-              onClick={() => {
-                sendSMS();
-              }}
-            >
-              שלח סיסמא חד פעמית
-            </Button>
-          </Form.Item>
-        </Form>
-      </div>
-      <div className={otpHidden}>
-        <OtpInput
-          inputStyle={{ direction: "rtl" }}
-          value={otp}
-          onChange={setOTP}
-          numInputs={6}
-          shouldAutoFocus={true}
-          renderSeparator={<span>•</span>}
-          renderInput={(props) => <input {...props} />}
-        ></OtpInput>
-        <button
-          onClick={() => {
-            verifyOTP();
+            },
           }}
         >
-          התחבר
-        </button>
-        <button
-          onClick={() => {
-            authService.updateOTP(phone);
-            startCountdown();
-          }}
-          disabled={countdown}
-        >
-          <>{timer === 0 ? "שלח קוד חדש" : `שלח קוד חדש ${timer}`}</>
-        </button>
-      </div>
-      <div className={registerHidden}>
-        <div>
           <Form
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 16 }}
-            layout="horizontal"
-            style={{ maxWidth: "100%" }}
+            style={{
+              maxWidth: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            {/* <Form.Item<FieldType>
-                label="מספר טלפון"
-                name="phone"
-                rules={[
-                  { required: true, message: "אנא הכנס מספר טלפון" },
-                  {
-                    validator(rule, value, callback) {
-                      if (!isPhoneValid(value)) {
-                        callback("אנא הכנס מספר טלפון תקין");
-                      }
-                      callback();
-                    },
-                  },
-                ]}
-              >
-                <PhoneInput
-                  style={{ direction: "ltr" }}
-                  defaultCountry={"il"}
-                  value={phone}
-                  onChange={(value) => {
-                    console.log(phone);
-                    isPhoneValid(value);
-                  }}
-                />
-              </Form.Item> */}
-            <Form.Item<FieldType>
-              label="שם פרטי"
-              name="firstName"
-              rules={[
-                { required: true, message: "אנא הכנס שם פרטי" },
-                {
-                  validator(rule, value) {
-                    if (value.length > 0) {
-                      setIsFNameValid(true);
-                    } else {
-                      setIsFNameValid(false);
-                    }
-                  },
-                },
-              ]}
-            >
-              <Input
-                value={firstName}
-                onChange={(e) => {
-                  setFirstName(e.target.value);
-                }}
-              />
+            <Form.Item>
+              <h3>התחברות</h3>
             </Form.Item>
             <Form.Item<FieldType>
-              label="שם משפחה"
-              name="lastName"
+              style={{ color: "white" }}
+              label="מספר טלפון"
+              name="phone"
               rules={[
+                { required: true, message: "אנא הכנס מספר טלפון" },
                 {
-                  required: true,
-                  message: "אנא הכנס שם משפחה",
-                },
-                {
-                  validator(rule, value) {
-                    if (value.length > 0) {
-                      setIsLNameValid(true);
-                    } else {
-                      setIsLNameValid(false);
+                  validator(rule, value, callback) {
+                    if (!isPhoneValid(value)) {
+                      callback("אנא הכנס מספר טלפון תקין");
                     }
+                    callback();
                   },
                 },
               ]}
             >
-              <Input
-                value={lastName}
-                onChange={(e) => {
-                  setLastName(e.target.value);
+              <PhoneInput
+                required
+                style={{ direction: "ltr", backgroundColor: "transparent" }}
+                defaultCountry={"il"}
+                defaultMask="...-...-...."
+                value={phone}
+                onChange={(value) => {
+                  console.log(value);
+                  isPhoneValid(value);
                 }}
               />
             </Form.Item>
             <Form.Item>
               <Button
+                disabled={!isValid}
                 onClick={() => {
-                  registerUser();
+                  sendSMS();
                 }}
-                disabled={!isValid || !isFNameValid || !isLNameValid}
               >
-                הירשם
+                שלח סיסמא חד פעמית
               </Button>
             </Form.Item>
           </Form>
+        </ConfigProvider>
+      </div>
+      <div className={telegramHidden}>
+        <Form
+          style={{
+            maxWidth: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Form.Item>
+            <h3>הירשם לקבלת סיסמא באמצעות טלגרם</h3>
+          </Form.Item>
+          <Form.Item>
+            <a
+              href="https://t.me/ChicknezBarberBot"
+              target="_blank"
+              className="telegram-link"
+            >
+              לחץ כאן
+            </a>
+          </Form.Item>
+          <Form.Item>
+            <Button
+              onClick={async () => {
+                setChatID(await authService.getChatID());
+                setTelegramHidden("hidden");
+                setRegisterHidden("registerDiv");
+              }}
+            >
+              לחץ כאן לאחר הביצוע
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+      <div className={registerHidden}>
+        <div>
+          <ConfigProvider
+            theme={{
+              components: {
+                Form: {
+                  labelColor: "white",
+                  labelRequiredMarkColor: "red",
+                },
+                Input: {
+                  colorBgContainer: "transparent",
+                },
+              },
+            }}
+          >
+            <Form
+              labelCol={{ span: 8 }}
+              wrapperCol={{ span: 16 }}
+              layout="horizontal"
+              style={{
+                maxWidth: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Form.Item>
+                <h3>הרשמה</h3>
+              </Form.Item>
+              <Form.Item<FieldType>
+                label="שם פרטי"
+                name="firstName"
+                rules={[{ required: true, message: "אנא הכנס שם פרטי" }]}
+              >
+                <Input
+                  value={firstName}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item<FieldType>
+                label="שם משפחה"
+                name="lastName"
+                rules={[
+                  {
+                    required: true,
+                    message: "אנא הכנס שם משפחה",
+                  },
+                ]}
+              >
+                <Input
+                  value={lastName}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  onClick={() => {
+                    registerUser();
+                  }}
+                  disabled={
+                    lastName.length > 0 && firstName.length > 0 ? false : true
+                  }
+                >
+                  הירשם
+                </Button>
+              </Form.Item>
+            </Form>
+          </ConfigProvider>
         </div>
+      </div>
+      <div className={otpHidden}>
+        <ConfigProvider
+          theme={{
+            components: {
+              Form: {
+                labelColor: "white",
+                labelRequiredMarkColor: "red",
+              },
+            },
+          }}
+        >
+          <Form
+            style={{
+              maxWidth: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Form.Item>
+              <h3>אנא אמת קוד חד פעמי</h3>
+            </Form.Item>
+            <Form.Item>
+              <Input.OTP
+                style={{ direction: "ltr" }}
+                length={6}
+                value={otp}
+                onChange={(value) => setOTP(value)}
+                autoFocus
+              ></Input.OTP>
+            </Form.Item>
+            <Form.Item>
+              <button
+                onClick={() => {
+                  verifyOTP();
+                }}
+              >
+                התחבר
+              </button>
+            </Form.Item>
+            <Form.Item>
+              <button
+                onClick={() => {
+                  authService.updateOTP(phone);
+                  startCountdown();
+                }}
+                disabled={countdown}
+              >
+                <>{timer === 0 ? "שלח קוד חדש" : `שלח קוד חדש ${timer}`}</>
+              </button>
+            </Form.Item>
+          </Form>
+        </ConfigProvider>
       </div>
     </div>
   );
 }
 
 export default SignIn;
-function sendDataToParent(modalOpen: boolean) {
-  throw new Error("Function not implemented.");
-}

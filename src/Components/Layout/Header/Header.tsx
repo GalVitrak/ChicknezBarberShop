@@ -9,7 +9,7 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
-import { Modal } from "antd";
+import { Modal, ConfigProvider } from "antd";
 import SignIn from "../../Auth/Signin/SignIn";
 
 function Header(): JSX.Element {
@@ -87,22 +87,38 @@ function Header(): JSX.Element {
           גלריה
         </button>
       </div>
-      <Modal
-        okText="התחבר"
-        cancelText="ביטול"
-        title="התחברות"
-        width={550}
-        centered={true}
-        open={modalOpen}
-        onCancel={() => {
-          setModalOpen(false);
+      <ConfigProvider
+        theme={{
+          components: {
+            Modal: {
+              contentBg: "transparent",
+              headerBg: "transparent",
+              titleColor: "white",
+            },
+          },
         }}
-        cancelButtonProps={{ style: { display: "none" } }}
-        okButtonProps={{ style: { display: "none" } }}
-        destroyOnClose={true}
       >
-        <SignIn closeModal={handleCallback} />
-      </Modal>
+        <Modal
+          okText="התחבר"
+          title="התחברות"
+          centered={true}
+          open={modalOpen}
+          onCancel={() => {
+            setModalOpen(false);
+          }}
+          cancelButtonProps={{ style: { display: "none" } }}
+          okButtonProps={{ style: { display: "none" } }}
+          destroyOnClose={true}
+          style={{
+            backdropFilter: "blur(20px)",
+            boxShadow: "0px 0px 50px rgba(227, 228, 267, 0.38)",
+            border: "2px solid rgba(255, 255, 255, 0.20)",
+            borderRadius: "20px",
+          }}
+        >
+          <SignIn closeModal={handleCallback} />
+        </Modal>
+      </ConfigProvider>
     </div>
   );
 }

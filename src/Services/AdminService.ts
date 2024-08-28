@@ -72,6 +72,11 @@ class AdminService {
     );
     await deleteAppointmentType({ id: id });
   }
+
+  public async editAppointmentType(type: AppointmentTypeModel): Promise<void> {
+    const editAppointmentType = httpsCallable(functions, "editAppointmentType");
+    await editAppointmentType(type);
+  }
 }
 
 const adminService = new AdminService();

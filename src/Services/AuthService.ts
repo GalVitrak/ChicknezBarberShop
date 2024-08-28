@@ -4,8 +4,18 @@ import { httpsCallable } from "firebase/functions";
 import UserModel from "../Models/UserModel";
 import CredentialsModel from "../Models/CredentialsModel";
 import { functions } from "../../firebase-config";
+import axios from "axios";
 
 class AuthService {
+  public async getChatID(): Promise<string> {
+    const response = await axios.get(
+      "https://api.telegram.org/bot7340796327:AAEs2Px38L0gOc-Bjk8SFAsFccNogcEAjCY/getUpdates"
+    );
+    const chatID =
+      response.data.result[response.data.result.length - 1].message.chat.id;
+    return chatID;
+  }
+
   public async userExists(phone: string): Promise<boolean> {
     const countPhone = httpsCallable(functions, "countPhone");
     const users: any = await countPhone({ phone: phone });

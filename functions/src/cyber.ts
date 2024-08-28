@@ -1,6 +1,12 @@
 import * as jwt from "jsonwebtoken";
 import * as crypto from "crypto-js";
+import axios from "axios";
+import { log } from "firebase-functions/logger";
 const jwtSecretKey = "ChicknezBarberSh";
+
+const botToken = "7340796327:AAEs2Px38L0gOc-Bjk8SFAsFccNogcEAjCY";
+
+const url = "https://api.telegram.org/bot" + botToken;
 
 // // a function to generate a new Token
 function getNewToken(user: {}): string {
@@ -8,6 +14,13 @@ function getNewToken(user: {}): string {
   const options = { expiresIn: "120h" };
   const token = jwt.sign(container, jwtSecretKey, options);
   return token;
+}
+
+async function sendTelegramMessage(message: string, chatID: string) {
+  const response = await axios.get(
+    url + "/sendMessage?chat_id=" + chatID + "&text=" + message
+  );
+  log(response.data);
 }
 
 // // a function to verify the token
@@ -39,9 +52,9 @@ function getNewToken(user: {}): string {
 
 // //for sms
 function generateOTP() {
-  // const otp = Math.floor(Math.random() * 900000) + 100000;
-  const hashedOTP = hash("123456");
-  return hashedOTP;
+  const otp = Math.floor(Math.random() * 900000) + 100000;
+  // const hashedOTP = hash("123456");
+  return otp;
 }
 
 const salt = "TommyChicknez";
@@ -75,5 +88,6 @@ export default {
   //   //   verifyAdmin,
   generateOTP,
   hash,
+  sendTelegramMessage,
   //   //   validateOTP,
 };

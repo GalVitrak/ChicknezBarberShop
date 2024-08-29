@@ -111,6 +111,7 @@ function SignIn(props: SignInProps): JSX.Element {
       navigate("/home");
       return;
     }
+    console.log(chatID);
     const user = new UserModel(firstName, lastName, phone, chatID);
     authService.registerUser(user);
     setRegisterHidden("hidden");

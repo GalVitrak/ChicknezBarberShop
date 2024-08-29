@@ -13,6 +13,14 @@ const firebaseConfig = {
   appId: "1:794943114385:web:8458125fe3354773d90330",
 };
 
+const jwtSecretKey = "ChicknezBarberSh";
+
+const botToken = "7340796327:AAEs2Px38L0gOc-Bjk8SFAsFccNogcEAjCY";
+
+const url = "https://api.telegram.org/bot" + botToken;
+
+const salt = "TommyChicknez";
+
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
@@ -22,3 +30,5 @@ export const functions = getFunctions(app);
 if (window.location.hostname === "localhost") {
   connectFunctionsEmulator(functions, "localhost", 5002);
 }
+
+export const config = { jwtSecretKey, url, salt };
